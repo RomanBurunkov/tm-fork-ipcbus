@@ -1,0 +1,22 @@
+{
+  "name": "tm-fork-ipcbus",
+  "version": "0.0.1",
+  "description": "Node fork inter process communication bus",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RomanBurunkov/tm-fork-ipcbus.git"
+  },
+  "keywords": [
+    "ipc"
+  ],
+  "author": "Roman Burunkov <romon2002@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/RomanBurunkov/tm-fork-ipcbus/issues"
+  },
+  "homepage": "https://github.com/RomanBurunkov/tm-fork-ipcbus#readme"
+}
