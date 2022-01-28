@@ -4,7 +4,11 @@
   "description": "Node fork inter process communication bus",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "lint": "eslint --ignore-path .gitignore index.js",
+    "lint:tests": "eslint --fix --ignore-path .gitignore test/**",
+    "lint:fix": "eslint --fix --ignore-path .gitignore index.js",
+    "test": "jest",
+    "test:coverage": "jest --coverage"
   },
   "repository": {
     "type": "git",
@@ -18,5 +22,41 @@
   "bugs": {
     "url": "https://github.com/RomanBurunkov/tm-fork-ipcbus/issues"
   },
-  "homepage": "https://github.com/RomanBurunkov/tm-fork-ipcbus#readme"
+  "homepage": "https://github.com/RomanBurunkov/tm-fork-ipcbus#readme",
+  "dependencies": {
+    "tm-is": "^0.2.0",
+    "tm-result": "^0.0.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.7.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.25.4",
+    "jest": "^27.4.7"
+  },
+  "eslintConfig": {
+    "env": {
+      "node": true,
+      "jest": true
+    },
+    "parserOptions": {
+      "ecmaFeatures": {
+        "legacyDecorators": true
+      }
+    },
+    "extends": [
+      "airbnb-base"
+    ],
+    "rules": {
+      "import/prefer-default-export": "off"
+    }
+  },
+  "jest": {
+    "verbose": true,
+    "moduleFileExtensions": [
+      "js",
+      "json"
+    ],
+    "testRegex": ".spec.js$",
+    "coverageDirectory": "./coverage"
+  }
 }
