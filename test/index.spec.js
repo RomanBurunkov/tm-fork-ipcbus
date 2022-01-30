@@ -3,7 +3,7 @@ const { join } = require('path');
 const { isFunc } = require('tm-is');
 const IpcBus = require('../index');
 
-const PUB_METHODS = ['request', 'response'];
+const PUB_METHODS = ['request', 'response', 'task'];
 
 describe('Basic FORK IPC BUS class tests', () => {
   test('IpcBus should be defined', () => expect(IpcBus).toBeDefined());
@@ -48,16 +48,16 @@ describe('FORK IPC BUS class unit tests', () => {
 
 describe('Functional tests', () => {
   const workerProcess = fork(join(__dirname, 'worker.js'));
-  const testIpcBus = new IpcBus({ process: workerProcess })
+  const testIpcBus = new IpcBus({ process: workerProcess, reqTimeout: 1000 })
 
-  test('Test request to the worker', async () => {
+  test('Should make a successful test request to the worker', async () => {
     const a = 5;
     const b = 7;
     const result = await testIpcBus.request('+', { a, b })
     expect(result).toBe(a + b);
   });
 
-  test('Test request to the worker 100 times', async () => {
+  test('Should make a successful test request to the worker 100 times', async () => {
     let result;
     for (let i = 0; i < 100; i += 1) {
       result = await testIpcBus.request('+', { a: i, b: i })
@@ -65,7 +65,18 @@ describe('Functional tests', () => {
     }
   });
 
-  test('Test exit request to the worker', async () => {
+  test('Should throw an error if request to the worker timed out', async () => {
+    const cmd = 'testTimeout';
+    await expect(testIpcBus.request(cmd))
+      .rejects.toThrow(`Request '${cmd}' timeout!`)
+  });
+
+  test('Should emit invalidMessage event if incoming message validation failed', (done) => {
+    testIpcBus.once('invalidMessage', () => done());
+    testIpcBus.task('sendInvalidMessage');
+  });
+
+  test('Should get ok response on exit request to the worker', async () => {
     const exit = await testIpcBus.request('exit');
     expect(exit).toBe('ok');
   });

@@ -9,19 +9,26 @@ const ForkIpcBus = require('../index');
 const interval = setInterval(() => { }, 5000);
 
 const ipcBus = new ForkIpcBus();
+
 ipcBus.on('request', (req) => {
   const { header, payload } = req;
   switch (header.cmd) {
     case '+': {
       const result = payload.a + payload.b;
-      ipcBus.response(header.id, header.cmd, result);
-      break;
+      return ipcBus.response(header.id, header.cmd, result);
     }
     case 'exit':
       ipcBus.response(header.id, header.cmd, 'ok');
       clearInterval(interval);
-      process.exit();
-      break;
-    default: break;
+      return process.exit();
+    default: return false;
+  }
+});
+
+ipcBus.on('task', (task) => {
+  const { header } = task;
+  switch (header.cmd) {
+    case 'sendInvalidMessage': return ipcBus.send('This is an invalid message!');
+    default: return false;
   }
 });
