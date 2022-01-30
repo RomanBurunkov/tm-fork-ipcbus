@@ -135,4 +135,14 @@ module.exports = class FORK_IPC_BUS extends EventEmitter {
     const header = { id, cmd, type: 1 };
     this.send({ header, payload });
   }
+
+  /**
+   * Send a task message.
+   * @param {string} cmd Task command.
+   * @param {*} payload Task data if needed.
+   */
+  task(cmd, payload) {
+    const header = { cmd, type: 3 };
+    this.send({ header, payload });
+  }
 };
