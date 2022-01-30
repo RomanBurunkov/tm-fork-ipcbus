@@ -18,6 +18,7 @@ const TYPES = [
 const DEF_REQ_TIMEOUT = 5000;
 
 const REQUESTS = Symbol('Key for requests array');
+const MSG_HANDLER = Symbol('Process messages handler');
 
 module.exports = class FORK_IPC_BUS extends EventEmitter {
   /**
@@ -29,8 +30,9 @@ module.exports = class FORK_IPC_BUS extends EventEmitter {
     super();
     this[REQUESTS] = [];
     this.reqTimeout = opts.reqTimeout || DEF_REQ_TIMEOUT;
+    this[MSG_HANDLER] = (msg) => this.messageHandler(msg);
     this.process = opts.process || process;
-    this.process.on('message', (msg) => this.messageHandler(msg));
+    this.process.on('message', this[MSG_HANDLER]);
   }
 
   /**
@@ -51,28 +53,26 @@ module.exports = class FORK_IPC_BUS extends EventEmitter {
     }
   }
 
+  /**
+   * Cleans up all bus data, timeouts, etc.
+   */
+  destroy() {
+    // Clean up pending requests.
+    this[REQUESTS].forEach((reqItm) => {
+      clearTimeout(reqItm.timeout);
+      reqItm.reject(new Error('Request canceled!'));
+    });
+    this[REQUESTS] = [];
+    // Remove event listeners.
+    this.process.removeListener('message', this[MSG_HANDLER]);
+  }
+
   send(data) {
     this.process.send(data);
   }
 
-  messageHandler(msg) {
-    if (!FORK_IPC_BUS.validateMessage(msg)) return false;
-    const type = TYPES[msg.header.type];
-    switch (type) {
-      case 'request': return this.emit('request', msg);
-      case 'response': return this.respondOnRequest(msg.header.id, 'resolve', msg.payload);
-      default: return false;
-    }
-  }
-
-  setRequestTimeout(id, cmd) {
-    return setTimeout(() => {
-      this.respondOnRequest(id, 'reject', new Error(`Request '${cmd}' timeout!`));
-    }, this.reqTimeout);
-  }
-
   /**
-   * Respond on pending requests.
+   * Respond on pending requests(end up request promise).
    * @param {string} id Request unique id.
    * @param {string} method resolve/reject method to end up pending request promise.
    * @param {*} result Request results.
@@ -83,6 +83,25 @@ module.exports = class FORK_IPC_BUS extends EventEmitter {
     const [request] = this[REQUESTS].splice(reqIndex, 1);
     clearTimeout(request.timeout);
     request[method](result);
+  }
+
+  messageHandler(msg) {
+    if (!FORK_IPC_BUS.validateMessage(msg)) {
+      this.emit('invalidMessage', msg);
+      return;
+    }
+    const { header, payload } = msg;
+    const type = TYPES[header.type];
+    this.emit(type, msg);
+    if (type === 'response') {
+      this.respondOnRequest(header.id, 'resolve', payload);
+    }
+  }
+
+  setRequestTimeout(id, cmd) {
+    return setTimeout(() => {
+      this.respondOnRequest(id, 'reject', new Error(`Request '${cmd}' timeout!`));
+    }, this.reqTimeout);
   }
 
   /**
@@ -106,6 +125,12 @@ module.exports = class FORK_IPC_BUS extends EventEmitter {
     });
   }
 
+  /**
+   * Send a response message on the corresponding request.
+   * @param {string} id Request id.
+   * @param {string} cmd Request command.
+   * @param {*} payload Request results to send within response message.
+   */
   response(id, cmd, payload) {
     const header = { id, cmd, type: 1 };
     this.send({ header, payload });
