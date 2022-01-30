@@ -4,9 +4,9 @@
   "description": "Node fork inter process communication bus",
   "main": "index.js",
   "scripts": {
-    "lint": "eslint --ignore-path .gitignore index.js",
+    "lint": "eslint --ignore-path .gitignore index.js test/worker.js",
     "lint:tests": "eslint --fix --ignore-path .gitignore test/**",
-    "lint:fix": "eslint --fix --ignore-path .gitignore index.js",
+    "lint:fix": "eslint --fix --ignore-path .gitignore index.js test/worker.js",
     "test": "jest",
     "test:coverage": "jest --coverage"
   },
@@ -25,7 +25,8 @@
   "homepage": "https://github.com/RomanBurunkov/tm-fork-ipcbus#readme",
   "dependencies": {
     "tm-is": "^0.2.0",
-    "tm-result": "^0.0.1"
+    "tm-result": "^0.0.1",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "eslint": "^8.7.0",
