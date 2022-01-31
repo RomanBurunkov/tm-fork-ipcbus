@@ -63,8 +63,10 @@ module.exports = class FORK_IPC_BUS extends EventEmitter {
       reqItm.reject(new Error('Request canceled!'));
     });
     this[REQUESTS] = [];
-    // Remove event listeners.
+    // Clean up process and it's event listeners.
     this.process.removeListener('message', this[MSG_HANDLER]);
+    this[MSG_HANDLER] = null;
+    this.process = null;
   }
 
   send(data) {
@@ -126,7 +128,7 @@ module.exports = class FORK_IPC_BUS extends EventEmitter {
   }
 
   /**
-   * Send a response message on the corresponding request.
+   * Answer on the corresponding request.
    * @param {string} id Request id.
    * @param {string} cmd Request command.
    * @param {*} payload Request results to send within response message.
@@ -137,12 +139,31 @@ module.exports = class FORK_IPC_BUS extends EventEmitter {
   }
 
   /**
+   * Send an event message.
+   * @param {string} cmd Event command.
+   * @param {*} payload Event data if needed.
+   */
+  event(cmd, payload) {
+    const header = { cmd, type: 2 };
+    this.send({ header, payload });
+  }
+
+  /**
    * Send a task message.
    * @param {string} cmd Task command.
    * @param {*} payload Task data if needed.
    */
   task(cmd, payload) {
     const header = { cmd, type: 3 };
+    this.send({ header, payload });
+  }
+
+  /**
+   * Send a text message.
+   * @param {string} payload Message text
+   */
+  message(payload) {
+    const header = { cmd: 'message', type: 4 };
     this.send({ header, payload });
   }
 };
