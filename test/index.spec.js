@@ -3,7 +3,7 @@ const { join } = require('path');
 const { isFunc } = require('tm-is');
 const IpcBus = require('../index');
 
-const PUB_METHODS = ['request', 'response', 'task'];
+const PUB_METHODS = ['send', 'request', 'response', 'event', 'task', 'message'];
 
 describe('Basic FORK IPC BUS class tests', () => {
   test('IpcBus should be defined', () => expect(IpcBus).toBeDefined());

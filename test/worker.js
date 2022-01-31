@@ -11,14 +11,13 @@ const interval = setInterval(() => { }, 5000);
 const ipcBus = new ForkIpcBus();
 
 ipcBus.on('request', (req) => {
-  const { header, payload } = req;
-  switch (header.cmd) {
+  const { header: { id, cmd }, payload } = req;
+  switch (cmd) {
     case '+': {
-      const result = payload.a + payload.b;
-      return ipcBus.response(header.id, header.cmd, result);
+      return ipcBus.response(id, cmd, payload.a + payload.b);
     }
     case 'exit':
-      ipcBus.response(header.id, header.cmd, 'ok');
+      ipcBus.response(id, cmd, 'ok');
       clearInterval(interval);
       return process.exit();
     default: return false;
