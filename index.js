@@ -64,7 +64,9 @@ module.exports = class FORK_IPC_BUS extends EventEmitter {
     });
     this[REQUESTS] = [];
     // Clean up process and it's event listeners.
-    this.process.removeListener('message', this[MSG_HANDLER]);
+    if (this.process) { // Check whether process still exist.
+      this.process.removeListener('message', this[MSG_HANDLER]);
+    }
     this[MSG_HANDLER] = null;
     this.process = null;
   }
