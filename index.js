@@ -109,10 +109,10 @@ module.exports = class FORK_IPC_BUS extends EventEmitter {
   /**
    * Send a request through IPC channel.
    * @param {string} cmd Request command.
-   * @param {*} payload Request data.
+   * @param {*} payload Request data, empty object as default.
    * @returns {Promise} Promise which resolves after getting a response on the request.
    */
-  request(cmd, payload) {
+  request(cmd, payload = {}) {
     const id = uuidv4();
     const header = { id, cmd, type: 0 };
     return new Promise((resolve, reject) => {
@@ -131,9 +131,9 @@ module.exports = class FORK_IPC_BUS extends EventEmitter {
    * Answer on the corresponding request.
    * @param {string} id Request id.
    * @param {string} cmd Request command.
-   * @param {*} payload Request results to send within response message.
+   * @param {*} payload Request results to send within response message, empty object as default.
    */
-  response(id, cmd, payload) {
+  response(id, cmd, payload = {}) {
     const header = { id, cmd, type: 1 };
     this.send({ header, payload });
   }
@@ -141,9 +141,9 @@ module.exports = class FORK_IPC_BUS extends EventEmitter {
   /**
    * Send an event message.
    * @param {string} cmd Event command.
-   * @param {*} payload Event data if needed.
+   * @param {*} payload Event data if needed, empty object as default.
    */
-  event(cmd, payload) {
+  event(cmd, payload = {}) {
     const header = { cmd, type: 2 };
     this.send({ header, payload });
   }
@@ -151,9 +151,9 @@ module.exports = class FORK_IPC_BUS extends EventEmitter {
   /**
    * Send a task message.
    * @param {string} cmd Task command.
-   * @param {*} payload Task data if needed.
+   * @param {*} payload Task data if needed, empty object as default.
    */
-  task(cmd, payload) {
+  task(cmd, payload = {}) {
     const header = { cmd, type: 3 };
     this.send({ header, payload });
   }
