@@ -1,6 +1,6 @@
 {
   "name": "tm-fork-ipcbus",
-  "version": true,
+  "version": "0.0.4",
   "description": "Node fork inter process communication bus",
   "main": "index.js",
   "scripts": {
