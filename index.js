@@ -102,24 +102,33 @@ module.exports = class FORK_IPC_BUS extends EventEmitter {
     }
   }
 
-  setRequestTimeout(id, cmd) {
+  /**
+   * Timeout for requests.
+   * @param {string} id Request id.
+   * @param {string} cmd Request command/name.
+   * @param {number} reqTimeout Timeout in msecs for the request.
+   * @returns {Timeout} Timeout object.
+   */
+  setRequestTimeout(id, cmd, reqTimeout = this.reqTimeout) {
     return setTimeout(() => {
       this.respondOnRequest(id, 'reject', new Error(`Request '${cmd}' timeout!`));
-    }, this.reqTimeout);
+    }, reqTimeout);
   }
 
   /**
    * Send a request through IPC channel.
    * @param {string} cmd Request command.
    * @param {*} payload Request data, empty object as default.
+   * @param {number} reqTimeout Timeout in msecs for the request.
    * @returns {Promise} Promise which resolves after getting a response on the request.
    */
-  request(cmd, payload = {}) {
+  request(cmd, payload = {}, reqTimeout = this.reqTimeout) {
     const id = uuidv4();
     const header = { id, cmd, type: 0 };
     return new Promise((resolve, reject) => {
+      const timeout = this.setRequestTimeout(id, cmd, reqTimeout);
       this[REQUESTS].push({
-        id, resolve, reject, timeout: this.setRequestTimeout(id, cmd),
+        id, resolve, reject, timeout,
       });
       try {
         this.send({ header, payload });
